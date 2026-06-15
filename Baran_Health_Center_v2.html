@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Baran Health Center</title>
+<style>
+  :root{
+    --bg:#0b0e14;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.1);
+    --neon: #39ff88;
+    --neon2: #00e0ff;
+    --text:#e8f0ee;
+    --muted:#8a96a3;
+    --pink:#ff5fa2;
+    --yellow:#ffd166;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  body{
+    margin:0; font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background:
+      radial-gradient(circle at 15% -10%, rgba(57,255,136,0.10) 0%, transparent 40%),
+      radial-gradient(circle at 90% 0%, rgba(0,224,255,0.10) 0%, transparent 45%),
+      radial-gradient(circle at 20% 0%, #142031 0%, #0b0e14 60%);
+    color:var(--text); min-height:100vh; padding-bottom:90px;
+  }
+  header{
+    padding:22px 16px 14px; text-align:center; position:relative;
+  }
+  header h1{
+    margin:0; font-size:1.5rem; letter-spacing:2px; font-weight:800;
+    background: linear-gradient(90deg,var(--neon),var(--neon2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 30px rgba(57,255,136,0.25);
+  }
+  #dayCounter{
+    display:inline-block; margin-top:8px; padding:4px 14px;
+    background:rgba(255,255,255,0.05); border:1px solid var(--glass-border);
+    border-radius:20px; color:var(--muted); letter-spacing:0.5px;
+  }
+  .card{
+    background:var(--glass);
+    border:1px solid var(--glass-border);
+    border-radius:18px;
+    backdrop-filter: blur(10px);
+    padding:16px 18px;
+    margin:14px;
+    box-shadow:0 4px 24px rgba(0,0,0,0.25);
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .card h2{
+    margin:0 0 12px; font-size:0.85rem; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;
+    color:var(--neon2); display:flex; align-items:center; gap:8px;
+    padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .row{display:flex; justify-content:space-between; align-items:center; margin:6px 0;}
+  .counter-row{
+    display:flex; justify-content:space-between; align-items:center; margin:8px 0;
+    padding:10px 12px; background:rgba(255,255,255,0.03); border-radius:12px;
+    border:1px solid rgba(255,255,255,0.04);
+  }
+  .counter-row + .counter-row{margin-top:8px;}
+  .counter-row .label{display:flex; align-items:center; gap:10px; font-size:0.95rem; font-weight:500;}
+  .counter-row .label span:first-child{font-size:1.2rem;}
+  .counter-controls{display:flex; align-items:center; gap:14px;}
+  .counter-btn{
+    width:36px; height:36px; border-radius:50%; border:1px solid var(--glass-border);
+    background:rgba(255,255,255,0.06); color:var(--text); font-size:1.3rem; font-weight:bold;
+    display:flex; align-items:center; justify-content:center; user-select:none;
+    transition: background .15s ease, transform .1s ease;
+  }
+  .counter-btn:active{background:rgba(57,255,136,0.25); transform:scale(0.92);}
+  .counter-val{min-width:28px; text-align:center; font-size:1.15rem; font-weight:800; color:var(--neon2);}
+  .progress-bar{
+    height:12px; border-radius:8px; background:rgba(255,255,255,0.06); overflow:hidden; margin-top:8px;
+    border:1px solid rgba(255,255,255,0.05);
+  }
+  .progress-fill{
+    height:100%; background:linear-gradient(90deg,var(--neon),var(--neon2));
+    border-radius:8px; transition: width .5s ease;
+    box-shadow:0 0 14px var(--neon);
+  }
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .stat{
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);
+    border-radius:14px; padding:14px 10px; text-align:center;
+  }
+  .stat .val{font-size:1.5rem; font-weight:800; color:var(--neon); text-shadow:0 0 16px rgba(57,255,136,0.35);}
+  .stat .lbl{font-size:0.72rem; color:var(--muted); margin-top:4px; letter-spacing:0.5px; text-transform:uppercase;}
+  .checklist label{
+    display:flex; align-items:center; gap:12px; padding:11px 10px;
+    border-bottom:1px solid rgba(255,255,255,0.05); font-size:0.92rem;
+    border-radius:10px; transition: background .15s ease, opacity .15s ease;
+  }
+  .checklist label:hover{background:rgba(255,255,255,0.03);}
+  .checklist label:last-child{border-bottom:none;}
+  .checklist input[type=checkbox]{
+    width:22px; height:22px; accent-color: var(--neon); flex-shrink:0;
+  }
+  .checklist span.time{
+    margin-left:auto; color:var(--muted); font-size:0.75rem; background:rgba(255,255,255,0.05);
+    padding:2px 8px; border-radius:8px;
+  }
+  .checklist label.done{opacity:0.4; text-decoration:line-through;}
+  input[type=number], input[type=text], textarea{
+    background:rgba(255,255,255,0.06); border:1px solid var(--glass-border);
+    border-radius:8px; color:var(--text); padding:8px 10px; font-size:0.9rem; width:100%;
+  }
+  textarea{resize:vertical; min-height:60px;}
+  .slider-row{margin:10px 0;}
+  .slider-row .label{display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;}
+  .slider-row .label b{color:var(--neon);}
+  input[type=range]{width:100%; accent-color:var(--neon);}
+  canvas{width:100% !important; max-height:160px;}
+  nav{
+    position:fixed; bottom:0; left:0; right:0;
+    background:rgba(15,18,26,0.92); backdrop-filter: blur(16px);
+    border-top:1px solid var(--glass-border);
+    display:flex; justify-content:space-around; padding:8px 0 calc(8px + env(safe-area-inset-bottom));
+    box-shadow:0 -4px 20px rgba(0,0,0,0.3);
+  }
+  nav button{
+    background:none; border:none; color:var(--muted); font-size:0.7rem;
+    display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 14px; border-radius:12px;
+    transition: color .15s ease, background .15s ease;
+  }
+  nav button.active{color:var(--neon); background:rgba(57,255,136,0.08);}
+  nav button .icon{font-size:1.35rem;}
+  .tab{display:none;}
+  .tab.active{display:block; animation: fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  .save-btn, .add-btn{
+    background:linear-gradient(90deg,var(--neon),var(--neon2)); color:#001b10; border:none;
+    border-radius:12px; padding:12px 14px; font-weight:800; font-size:0.85rem; width:100%; margin-top:10px;
+    letter-spacing:0.3px; box-shadow:0 4px 16px rgba(57,255,136,0.2);
+  }
+  .save-btn:active, .add-btn:active{transform:scale(0.98);}
+  .small-note{font-size:0.75rem; color:var(--muted); margin-top:6px;}
+  .pill{
+    display:inline-block; background:rgba(57,255,136,0.12); color:var(--neon);
+    border:1px solid rgba(57,255,136,0.25);
+    border-radius:20px; padding:5px 12px; font-size:0.78rem; margin:0 6px 6px 0; font-weight:600;
+  }
+  .success-pct{
+    font-size:2.2rem; font-weight:800; color:var(--neon); text-align:center; margin-bottom:2px;
+    text-shadow:0 0 20px rgba(57,255,136,0.35);
+  }
+  .danger-btn{
+    background:rgba(255,95,162,0.15); color:var(--pink); border:1px solid rgba(255,95,162,0.4);
+    border-radius:10px; padding:8px 12px; font-size:0.8rem; width:100%; margin-top:10px;
+  }
+  .item-row{display:flex; gap:6px; margin-bottom:6px;}
+  .item-row input{flex:1;}
+  .item-row button{
+    background:rgba(255,95,162,0.15); color:var(--pink); border:1px solid rgba(255,95,162,0.3);
+    border-radius:8px; padding:0 12px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧬 BARAN HEALTH CENTER</h1>
+  <div id="dayCounter" class="small-note"></div>
+</header>
+
+<!-- DASHBOARD TAB -->
+<div class="tab active" id="tab-dashboard">
+
+  <div class="card">
+    <h2>🎯 Ana Hedef</h2>
+    <div id="goalsView"></div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Mevcut Durum</h2>
+    <div class="grid2" id="statsView"></div>
+  </div>
+
+  <div class="card">
+    <h2>🔥 Günlük Başarı</h2>
+    <div class="success-pct" id="successPct">0%</div>
+    <div class="progress-bar"><div class="progress-fill" id="successFill" style="width:0%"></div></div>
+    <div class="small-note" id="successText" style="text-align:center; margin-top:8px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>💊 Bugünkü Takviyeler</h2>
+    <div class="checklist" id="suppList"></div>
+  </div>
+
+  <div class="card">
+    <h2>🍽 Beslenme</h2>
+    <div class="checklist" id="nutritionList"></div>
+  </div>
+
+  <div class="card">
+    <h2>🏃 Günlük Hedefler</h2>
+    <div class="checklist" id="activityList"></div>
+  </div>
+
+  <div class="card">
+    <h2>☕ Tüketim Takibi</h2>
+    <div id="consumptionList"></div>
+  </div>
+
+  <div class="card">
+    <h2>🏆 Seri</h2>
+    <div id="streakView"></div>
+  </div>
+
+  <div class="card">
+    <h2>📝 Son Not</h2>
+    <textarea id="dailyNote" placeholder="Bugün için not ekle..."></textarea>
+    <button class="save-btn" onclick="saveNote()">Notu Kaydet</button>
+    <div id="notesHistory" class="small-note"></div>
+  </div>
+
+</div>
+
+<!-- SUPPLEMENTS TAB -->
+<div class="tab" id="tab-supplements">
+  <div class="card">
+    <h2>💊 Takviye Listesi</h2>
+    <div id="suppEditList"></div>
+    <div class="item-row">
+      <input type="text" id="newSuppName" placeholder="Takviye adı">
+      <input type="text" id="newSuppTime" placeholder="Saat (örn 09:00)" style="max-width:120px;">
+    </div>
+    <button class="add-btn" onclick="addSupplement()">+ Ekle</button>
+  </div>
+
+  <div class="card">
+    <h2>🍽 Beslenme Hedefleri</h2>
+    <div id="nutritionEditList"></div>
+    <div class="item-row">
+      <input type="text" id="newNutritionName" placeholder="Yeni öğe (örn 2L Su)">
+      <button onclick="addNutrition()">+</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🏃 Günlük Hedefler</h2>
+    <div id="activityEditList"></div>
+    <div class="item-row">
+      <input type="text" id="newActivityName" placeholder="Yeni hedef (örn Alkol Yok)">
+      <button onclick="addActivity()">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHARTS TAB -->
+<div class="tab" id="tab-charts">
+  <div class="card">
+    <h2>⚖️ Kilo Girişi</h2>
+    <div class="item-row">
+      <input type="number" id="weightInput" step="0.1" placeholder="kg">
+      <button class="add-btn" style="width:auto;" onclick="logWeight()">Kaydet</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📈 Kilo Grafiği</h2>
+    <canvas id="weightChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>⚡ Enerji / Libido / Akış</h2>
+    <div class="slider-row">
+      <div class="label"><span>Enerji</span><b id="energyVal">6</b></div>
+      <input type="range" min="1" max="10" id="energySlider" oninput="updateSliderLabel('energy')">
+    </div>
+    <div class="slider-row">
+      <div class="label"><span>Libido</span><b id="libidoVal">7</b></div>
+      <input type="range" min="1" max="10" id="libidoSlider" oninput="updateSliderLabel('libido')">
+    </div>
+    <div class="slider-row">
+      <div class="label"><span>İdrar Akışı</span><b id="flowVal">6</b></div>
+      <input type="range" min="1" max="10" id="flowSlider" oninput="updateSliderLabel('flow')">
+    </div>
+    <button class="save-btn" onclick="logVitals()">Bugünün Değerlerini Kaydet</button>
+  </div>
+
+  <div class="card">
+    <h2>📊 Enerji / Libido / Akış Grafiği</h2>
+    <canvas id="vitalsChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>📈 Başarı Oranı Grafiği</h2>
+    <canvas id="successChart"></canvas>
+  </div>
+</div>
+
+<!-- SETTINGS TAB -->
+<div class="tab" id="tab-settings">
+  <div class="card">
+    <h2>⚙️ Program Ayarları</h2>
+    <label class="small-note">Başlangıç Tarihi</label>
+    <input type="date" id="startDate">
+    <label class="small-note" style="margin-top:8px;">Toplam Gün (program süresi)</label>
+    <input type="number" id="totalDays" value="90">
+    <button class="save-btn" onclick="saveSettings()">Kaydet</button>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Ana Hedefler</h2>
+    <div id="goalsEditList"></div>
+    <div class="item-row">
+      <input type="text" id="newGoal" placeholder="Yeni hedef">
+      <button onclick="addGoal()">+</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Başlangıç Değerleri</h2>
+    <textarea id="baselineNotes" placeholder="Örn: Prostat 43cc, İdrar: Sık, Böbrek: Normal, Çocuk Planı: Evet"></textarea>
+    <button class="save-btn" onclick="saveBaseline()">Kaydet</button>
+  </div>
+
+  <div class="card">
+    <h2>💾 Veri Yönetimi</h2>
+    <div class="small-note">Tüm verilerin telefon/PC hafızasında (localStorage) saklanır. Yedek almak için dışa aktar.</div>
+    <button class="add-btn" onclick="exportData()">Verileri Dışa Aktar (.json)</button>
+    <button class="add-btn" onclick="document.getElementById('importFile').click()">Verileri İçe Aktar</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="danger-btn" onclick="resetData()">Tüm Verileri Sıfırla</button>
+  </div>
+</div>
+
+<nav>
+  <button class="nav-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
+    <span class="icon">🏠</span>Dashboard
+  </button>
+  <button class="nav-btn" data-tab="supplements" onclick="switchTab('supplements')">
+    <span class="icon">💊</span>Takviyeler
+  </button>
+  <button class="nav-btn" data-tab="charts" onclick="switchTab('charts')">
+    <span class="icon">📈</span>Grafikler
+  </button>
+  <button class="nav-btn" data-tab="settings" onclick="switchTab('settings')">
+    <span class="icon">⚙️</span>Ayarlar
+  </button>
+</nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const STORAGE_KEY = 'baranHealthCenter';
+
+const defaultData = {
+  startDate: new Date().toISOString().slice(0,10),
+  totalDays: 90,
+  goals: ["Prostat Kontrolü","Sperm Kalitesini Artırmak","Çocuk Sahibi Olmaya Hazırlık","Enerjiyi Artırmak"],
+  baseline: "Prostat: 43 cc\nİdrar: Sık\nBöbrek: Normal\nÇocuk Planı: Evet",
+  supplements: [
+    {name:"Omega", time:"08:00"},
+    {name:"D3", time:"08:00"},
+    {name:"Çinko", time:"08:00"},
+    {name:"CoQ10 Sabah", time:"08:00"},
+    {name:"L-Carnitine Öğle", time:"13:00"},
+    {name:"CoQ10 Akşam", time:"20:00"},
+    {name:"L-Carnitine Akşam", time:"20:00"}
+  ],
+  nutrition: ["3 Yumurta","Ceviz","Salata","2.5L Su","Sebze"],
+  activity: ["Yürüyüş","Alkol Yok","7+ Saat Uyku"],
+  // daily logs keyed by date string
+  days: {},
+  weightLog: [],   // {date, value}
+  vitalsLog: [],   // {date, energy, libido, flow}
+  successLog: [],  // {date, pct}
+  notes: []        // {date, text}
+};
+
+let data = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return Object.assign({}, defaultData, JSON.parse(raw));
+  }catch(e){}
+  return JSON.parse(JSON.stringify(defaultData));
+}
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+function getDayEntry(){
+  const t = todayStr();
+  if(!data.days[t]){
+    data.days[t] = {
+      supp: {}, nutrition: {}, activity: {}, consumption: {coffee:0, tea:0, alcohol:0}
+    };
+  }
+  if(!data.days[t].consumption){
+    data.days[t].consumption = {coffee:0, tea:0, alcohol:0};
+  }
+  return data.days[t];
+}
+
+// ---------- Tab switching ----------
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelector(`.nav-btn[data-tab="${name}"]`).classList.add('active');
+  if(name==='charts') renderCharts();
+}
+
+// ---------- Render dashboard ----------
+function renderDashboard(){
+  // day counter
+  const start = new Date(data.startDate);
+  const now = new Date(todayStr());
+  const dayNum = Math.floor((now-start)/(1000*60*60*24)) + 1;
+  const remaining = data.totalDays - dayNum;
+  document.getElementById('dayCounter').textContent =
+    `Gün ${Math.max(dayNum,1)} / ${data.totalDays}  ·  Kalan Gün: ${Math.max(remaining,0)}`;
+
+  // goals
+  document.getElementById('goalsView').innerHTML = data.goals.map(g=>`<div class="pill">✓ ${g}</div>`).join('');
+
+  // stats (latest weight/vitals)
+  const lastWeight = data.weightLog.length ? data.weightLog[data.weightLog.length-1].value : '-';
+  const lastVitals = data.vitalsLog.length ? data.vitalsLog[data.vitalsLog.length-1] : {energy:6,libido:7,flow:6};
+  document.getElementById('statsView').innerHTML = `
+    <div class="stat"><div class="val">${lastVitals.energy}</div><div class="lbl">Enerji</div></div>
+    <div class="stat"><div class="val">${lastVitals.libido}</div><div class="lbl">Libido</div></div>
+    <div class="stat"><div class="val">${lastVitals.flow}</div><div class="lbl">Akış</div></div>
+    <div class="stat"><div class="val">${lastWeight}</div><div class="lbl">Kilo (kg)</div></div>
+  `;
+
+  const day = getDayEntry();
+
+  // checklists
+  document.getElementById('suppList').innerHTML = data.supplements.map((s,i)=>{
+    const checked = day.supp[i] ? 'checked' : '';
+    const done = day.supp[i] ? 'done' : '';
+    return `<label class="${done}"><input type="checkbox" ${checked} onchange="toggleItem('supp',${i})"><span>${s.name}</span><span class="time">${s.time||''}</span></label>`;
+  }).join('');
+
+  document.getElementById('nutritionList').innerHTML = data.nutrition.map((n,i)=>{
+    const checked = day.nutrition[i] ? 'checked' : '';
+    const done = day.nutrition[i] ? 'done' : '';
+    return `<label class="${done}"><input type="checkbox" ${checked} onchange="toggleItem('nutrition',${i})"><span>${n}</span></label>`;
+  }).join('');
+
+  document.getElementById('activityList').innerHTML = data.activity.map((a,i)=>{
+    const checked = day.activity[i] ? 'checked' : '';
+    const done = day.activity[i] ? 'done' : '';
+    return `<label class="${done}"><input type="checkbox" ${checked} onchange="toggleItem('activity',${i})"><span>${a}</span></label>`;
+  }).join('');
+
+  // consumption counters
+  const consumptionItems = [
+    {key:'coffee', icon:'☕', label:'Kahve'},
+    {key:'tea', icon:'🍵', label:'Çay'},
+    {key:'alcohol', icon:'🍷', label:'Alkol'}
+  ];
+  document.getElementById('consumptionList').innerHTML = consumptionItems.map(c=>{
+    const val = day.consumption[c.key] || 0;
+    return `<div class="counter-row">
+      <div class="label"><span>${c.icon}</span><span>${c.label}</span></div>
+      <div class="counter-controls">
+        <div class="counter-btn" onclick="changeConsumption('${c.key}',-1)">−</div>
+        <div class="counter-val">${val}</div>
+        <div class="counter-btn" onclick="changeConsumption('${c.key}',1)">+</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // success %
+  const total = data.supplements.length + data.nutrition.length + data.activity.length;
+  const checkedCount = Object.values(day.supp).filter(Boolean).length
+    + Object.values(day.nutrition).filter(Boolean).length
+    + Object.values(day.activity).filter(Boolean).length;
+  const pct = total ? Math.round((checkedCount/total)*100) : 0;
+  document.getElementById('successFill').style.width = pct+'%';
+  document.getElementById('successPct').textContent = pct+'%';
+  document.getElementById('successText').textContent = `${checkedCount}/${total} tamamlandı`;
+
+  // streak
+  document.getElementById('streakView').innerHTML = `<div class="stat" style="display:inline-block; min-width:140px;"><div class="val">${calcStreak()} Gün</div><div class="lbl">Kesintisiz Devam</div></div>`;
+
+  // notes
+  document.getElementById('dailyNote').value = (data.notes.find(n=>n.date===todayStr())||{}).text || '';
+  document.getElementById('notesHistory').innerHTML = data.notes.slice(-5).reverse().map(n=>`<div>${n.date} - ${escapeHtml(n.text)}</div>`).join('');
+
+  // log success for today
+  upsertLog(data.successLog, {date: todayStr(), pct});
+  save();
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function calcStreak(){
+  let streak=0;
+  let d = new Date(todayStr());
+  while(true){
+    const ds = d.toISOString().slice(0,10);
+    const entry = data.days[ds];
+    if(!entry) break;
+    const total = data.supplements.length + data.nutrition.length + data.activity.length;
+    const checkedCount = Object.values(entry.supp||{}).filter(Boolean).length
+      + Object.values(entry.nutrition||{}).filter(Boolean).length
+      + Object.values(entry.activity||{}).filter(Boolean).length;
+    if(total>0 && checkedCount/total >= 0.8){
+      streak++;
+      d.setDate(d.getDate()-1);
+    } else break;
+  }
+  return streak;
+}
+
+const SHEET_LOG_URL = 'PASTE_APPS_SCRIPT_URL_HERE';
+
+function logToSheet(type, item, value){
+  if(!SHEET_LOG_URL || SHEET_LOG_URL.indexOf('PASTE_')===0) return;
+  let durum;
+  if(typeof value === 'number') durum = String(value);
+  else durum = value ? 'EVET' : 'HAYIR';
+  const params = new URLSearchParams({
+    date: todayStr(),
+    type: type,
+    item: item,
+    checked: durum
+  });
+  fetch(SHEET_LOG_URL + '?' + params.toString(), {method:'GET', mode:'no-cors'}).catch(()=>{});
+}
+
+function toggleItem(type, idx){
+  const day = getDayEntry();
+  day[type][idx] = !day[type][idx];
+  save();
+  let itemName = '';
+  if(type==='supp') itemName = (data.supplements[idx]||{}).name || ('Supplement '+idx);
+  else if(type==='nutrition') itemName = data.nutrition[idx] || ('Beslenme '+idx);
+  else if(type==='activity') itemName = data.activity[idx] || ('Aktivite '+idx);
+  logToSheet(type, itemName, day[type][idx]);
+  renderDashboard();
+}
+
+const consumptionLabels = {coffee:'Kahve', tea:'Çay', alcohol:'Alkol'};
+
+function changeConsumption(key, delta){
+  const day = getDayEntry();
+  const newVal = Math.max(0, (day.consumption[key]||0) + delta);
+  day.consumption[key] = newVal;
+  save();
+  logToSheet('consumption', consumptionLabels[key] || key, newVal);
+  renderDashboard();
+}
+
+function saveNote(){
+  const text = document.getElementById('dailyNote').value;
+  upsertLog(data.notes, {date: todayStr(), text});
+  save();
+  renderDashboard();
+}
+
+function upsertLog(arr, entry){
+  const i = arr.findIndex(e=>e.date===entry.date);
+  if(i>=0) arr[i]=entry; else arr.push(entry);
+}
+
+// ---------- Supplements / Nutrition / Activity editing ----------
+function renderEditLists(){
+  document.getElementById('suppEditList').innerHTML = data.supplements.map((s,i)=>`
+    <div class="item-row">
+      <input type="text" value="${escapeAttr(s.name)}" onchange="data.supplements[${i}].name=this.value; save();">
+      <input type="text" style="max-width:100px;" value="${escapeAttr(s.time||'')}" onchange="data.supplements[${i}].time=this.value; save();">
+      <button onclick="removeItem('supplements',${i})">✕</button>
+    </div>`).join('');
+
+  document.getElementById('nutritionEditList').innerHTML = data.nutrition.map((n,i)=>`
+    <div class="item-row">
+      <input type="text" value="${escapeAttr(n)}" onchange="data.nutrition[${i}]=this.value; save();">
+      <button onclick="removeItem('nutrition',${i})">✕</button>
+    </div>`).join('');
+
+  document.getElementById('activityEditList').innerHTML = data.activity.map((a,i)=>`
+    <div class="item-row">
+      <input type="text" value="${escapeAttr(a)}" onchange="data.activity[${i}]=this.value; save();">
+      <button onclick="removeItem('activity',${i})">✕</button>
+    </div>`).join('');
+
+  document.getElementById('goalsEditList').innerHTML = data.goals.map((g,i)=>`
+    <div class="item-row">
+      <input type="text" value="${escapeAttr(g)}" onchange="data.goals[${i}]=this.value; save();">
+      <button onclick="removeItem('goals',${i})">✕</button>
+    </div>`).join('');
+}
+function escapeAttr(s){ return (s||'').replace(/"/g,'&quot;'); }
+
+function removeItem(key, idx){
+  data[key].splice(idx,1);
+  save();
+  renderEditLists();
+  renderDashboard();
+}
+function addSupplement(){
+  const name = document.getElementById('newSuppName').value.trim();
+  const time = document.getElementById('newSuppTime').value.trim();
+  if(!name) return;
+  data.supplements.push({name, time});
+  document.getElementById('newSuppName').value='';
+  document.getElementById('newSuppTime').value='';
+  save(); renderEditLists(); renderDashboard();
+}
+function addNutrition(){
+  const v = document.getElementById('newNutritionName').value.trim();
+  if(!v) return;
+  data.nutrition.push(v);
+  document.getElementById('newNutritionName').value='';
+  save(); renderEditLists(); renderDashboard();
+}
+function addActivity(){
+  const v = document.getElementById('newActivityName').value.trim();
+  if(!v) return;
+  data.activity.push(v);
+  document.getElementById('newActivityName').value='';
+  save(); renderEditLists(); renderDashboard();
+}
+function addGoal(){
+  const v = document.getElementById('newGoal').value.trim();
+  if(!v) return;
+  data.goals.push(v);
+  document.getElementById('newGoal').value='';
+  save(); renderEditLists(); renderDashboard();
+}
+
+// ---------- Settings ----------
+function renderSettings(){
+  document.getElementById('startDate').value = data.startDate;
+  document.getElementById('totalDays').value = data.totalDays;
+  document.getElementById('baselineNotes').value = data.baseline || '';
+}
+function saveSettings(){
+  data.startDate = document.getElementById('startDate').value || data.startDate;
+  data.totalDays = parseInt(document.getElementById('totalDays').value) || data.totalDays;
+  save(); renderDashboard();
+}
+function saveBaseline(){
+  data.baseline = document.getElementById('baselineNotes').value;
+  save();
+}
+
+// ---------- Weight / Vitals ----------
+function logWeight(){
+  const v = parseFloat(document.getElementById('weightInput').value);
+  if(isNaN(v)) return;
+  upsertLog(data.weightLog, {date: todayStr(), value: v});
+  document.getElementById('weightInput').value='';
+  save(); renderDashboard(); renderCharts();
+}
+function updateSliderLabel(key){
+  document.getElementById(key+'Val').textContent = document.getElementById(key+'Slider').value;
+}
+function logVitals(){
+  const energy = parseInt(document.getElementById('energySlider').value);
+  const libido = parseInt(document.getElementById('libidoSlider').value);
+  const flow = parseInt(document.getElementById('flowSlider').value);
+  upsertLog(data.vitalsLog, {date: todayStr(), energy, libido, flow});
+  save(); renderDashboard(); renderCharts();
+}
+
+let charts = {};
+function renderCharts(){
+  const weightCtx = document.getElementById('weightChart');
+  const vitalsCtx = document.getElementById('vitalsChart');
+  const successCtx = document.getElementById('successChart');
+
+  const wLabels = data.weightLog.map(d=>d.date.slice(5));
+  const wValues = data.weightLog.map(d=>d.value);
+
+  const vLabels = data.vitalsLog.map(d=>d.date.slice(5));
+
+  const sLabels = data.successLog.map(d=>d.date.slice(5));
+  const sValues = data.successLog.map(d=>d.pct);
+
+  const opts = {
+    plugins:{legend:{labels:{color:'#e8f0ee'}}},
+    scales:{
+      x:{ticks:{color:'#8a96a3'}, grid:{color:'rgba(255,255,255,0.05)'}},
+      y:{ticks:{color:'#8a96a3'}, grid:{color:'rgba(255,255,255,0.05)'}}
+    }
+  };
+
+  if(charts.weight) charts.weight.destroy();
+  charts.weight = new Chart(weightCtx, {
+    type:'line',
+    data:{labels:wLabels, datasets:[{label:'Kilo (kg)', data:wValues, borderColor:'#39ff88', backgroundColor:'rgba(57,255,136,0.15)', tension:0.3, fill:true}]},
+    options: opts
+  });
+
+  if(charts.vitals) charts.vitals.destroy();
+  charts.vitals = new Chart(vitalsCtx, {
+    type:'line',
+    data:{labels:vLabels, datasets:[
+      {label:'Enerji', data:data.vitalsLog.map(d=>d.energy), borderColor:'#39ff88', tension:0.3},
+      {label:'Libido', data:data.vitalsLog.map(d=>d.libido), borderColor:'#ff5fa2', tension:0.3},
+      {label:'Akış', data:data.vitalsLog.map(d=>d.flow), borderColor:'#00e0ff', tension:0.3}
+    ]},
+    options: opts
+  });
+
+  if(charts.success) charts.success.destroy();
+  charts.success = new Chart(successCtx, {
+    type:'bar',
+    data:{labels:sLabels, datasets:[{label:'Başarı %', data:sValues, backgroundColor:'rgba(0,224,255,0.5)'}]},
+    options: opts
+  });
+}
+
+// ---------- Export / Import / Reset ----------
+function exportData(){
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'baran_health_data_'+todayStr()+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      const imported = JSON.parse(ev.target.result);
+      data = Object.assign({}, defaultData, imported);
+      save();
+      initAll();
+      alert('Veriler içe aktarıldı.');
+    }catch(err){
+      alert('Dosya okunamadı.');
+    }
+  };
+  reader.readAsText(file);
+}
+function resetData(){
+  if(!confirm('Tüm verileri silmek istediğine emin misin? Bu işlem geri alınamaz.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  data = JSON.parse(JSON.stringify(defaultData));
+  initAll();
+}
+
+// ---------- Init ----------
+function initAll(){
+  renderDashboard();
+  renderEditLists();
+  renderSettings();
+  // init sliders from last vitals
+  const lastVitals = data.vitalsLog.length ? data.vitalsLog[data.vitalsLog.length-1] : {energy:6,libido:7,flow:6};
+  document.getElementById('energySlider').value = lastVitals.energy;
+  document.getElementById('libidoSlider').value = lastVitals.libido;
+  document.getElementById('flowSlider').value = lastVitals.flow;
+  updateSliderLabel('energy');
+  updateSliderLabel('libido');
+  updateSliderLabel('flow');
+}
+initAll();
+</script>
+</body>
+</html>
